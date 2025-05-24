@@ -1,0 +1,226 @@
+
+Game #162962491, unrated.
+
+Card Pool: level 10
+O
+ starts with 
+7 Coppers
+.
+O
+ starts with 
+3 Estates
+.
+L
+ starts with 
+7 Coppers
+.
+L
+ starts with 
+3 Estates
+.
+O
+ shuffles their deck.
+L
+ shuffles their deck.
+O
+ draws 
+3 Coppers
+ and 
+2 Estates
+.
+L
+ draws 
+5 cards
+.
+Turn 1 - OneDayOfPeace
+O
+ plays 
+3 Coppers
+. (+$
+3
+)
+O
+ buys and gains 
+a Village
+.
+O
+ draws 
+4 Coppers
+ and 
+an Estate
+.
+Turn 1 - Lord Rattington
+L
+ plays 
+3 Coppers
+. (+$
+3
+)
+L
+ buys and gains 
+a Silver
+.
+L
+ draws 
+5 cards
+.
+Turn 2 - OneDayOfPeace
+O
+ plays 
+4 Coppers
+. (+$
+4
+)
+O
+ buys and gains 
+a Militia
+.
+O
+ shuffles their deck.
+O
+ draws 
+3 Coppers
+, 
+an Estate
+, 
+and 
+a Militia
+.
+Turn 2 - Lord Rattington
+L
+ plays 
+4 Coppers
+. (+$
+4
+)
+L
+ buys and gains 
+a Militia
+.
+L
+ shuffles their deck.
+L
+ draws 
+5 cards
+.
+Turn 3 - OneDayOfPeace
+O
+ plays 
+a Militia
+.
+O
+ gets +$
+2
+.
+L
+ discards 
+a card
+ and 
+an Estate
+.
+O
+ plays 
+3 Coppers
+. (+$
+3
+)
+O
+ buys and gains 
+a Laboratory
+.
+O
+ draws 
+3 Coppers
+, 
+an Estate
+, 
+and 
+a Village
+.
+Turn 3 - Lord Rattington
+L
+ plays 
+a Militia
+.
+L
+ gets +$
+2
+.
+O
+ discards 
+a Copper
+ and 
+an Estate
+.
+L
+ plays 
+a Silver
+ and 
+a Copper
+. (+$
+3
+)
+L
+ buys and gains 
+a Library
+.
+L
+ draws 
+5 cards
+.
+Turn 4 - OneDayOfPeace
+O
+ plays 
+a Village
+.
+O
+ draws 
+a Copper
+.
+O
+ gets +
+2
+ Actions.
+O
+ plays 
+3 Coppers
+. (+$
+3
+)
+O
+ buys and gains 
+a Village
+.
+O
+ shuffles their deck.
+O
+ draws 
+a Copper
+, 
+an Estate
+, 
+a Laboratory
+, 
+and 
+2 Villages
+.
+Turn 4 - Lord Rattington
+L
+ plays 
+4 Coppers
+. (+$
+4
+)
+L
+ buys and gains 
+a Silver
+.
+L
+ shuffles their deck.
+L
+ draws 
+5 cards
+.
+Turn 5 - OneDayOfPeace
+Joining game #162962365
+Joining game #162962491

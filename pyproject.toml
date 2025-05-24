@@ -1,0 +1,11 @@
+[project]
+name = "dominion-tracker"
+version = "0.1.0"
+description = "Track your Dominion deck and hand from game logs"
+authors = [{ name="Jonas Riedel", email="jonas.riedel2001gmail.com" }]
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.7"
+
+[project.scripts]
+dominion-tracker = "dominion_tracker.main:main"
