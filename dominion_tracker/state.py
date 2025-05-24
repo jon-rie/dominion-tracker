@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict,Counter
 from typing import Dict, List
 
 class InvalidCardMove(Exception):
@@ -41,14 +41,14 @@ class PlayerState:
         self.move_cards(self.in_play, self.discard, cards, action="discard")
     
     def gain_cards(self, cards: List[str]):
-        for card in cards:
-            self.discard[card] += 1
+        # Cards are gained from outside the tracked piles
+        synthetic_source = Counter(cards)
+        self.move_cards(synthetic_source, self.discard, cards, action="gain")
 
     def trash_cards(self, cards: List[str]):
-        for card in cards:
-            self.hand[card] -= 1
-            if self.hand[card] == 0:
-                del self.hand[card]
+        # Cards are trashed out of the game; destination is ignored
+        synthetic_trash = defaultdict(int)
+        self.move_cards(self.hand, synthetic_trash, cards, action="trash")
 
     def summary(self):
         return {
@@ -57,4 +57,14 @@ class PlayerState:
             "discard": dict(self.discard),
             "in_play": dict(self.in_play)   
         }
+    
+    def total_cards(self):
+        total = Counter()
+        for pile in [self.deck, self.hand, self.discard, self.in_play]:
+            total.update(pile)
+        return dict(total)
+    
+    def __repr__(self):
+        return f"Deck: {dict(self.deck)}, Hand: {dict(self.hand)}, Discard: {dict(self.discard)}, In Play: {dict(self.in_play)}"
+
 
