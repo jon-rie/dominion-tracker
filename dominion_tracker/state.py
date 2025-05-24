@@ -12,6 +12,7 @@ class PlayerState:
         self.hand: Dict[str, int] = defaultdict(int)
         self.discard: Dict[str, int] = defaultdict(int)
         self.in_play: Dict[str, int] = defaultdict(int)
+        self.safe: List[str] = []
 
     def move_cards(self, source: Dict[str, int], target: Dict[str, int], cards: List[str], action: str = ""):
         for card in cards:
@@ -31,6 +32,10 @@ class PlayerState:
 
     def move_from_deck_to_hand(self, cards: List[str]):
         self.move_cards(self.deck, self.hand, cards, action="draw")
+        self.safe_cards(cards)
+    
+    def move_from_hand_to_deck(self, cards: List[str]):
+        self.move_cards(self.hand, self.deck, cards, action="return to deck")
 
     def move_from_played_to_discard(self, cards: List[str]):
         self.move_cards(self.in_play, self.discard, cards, action="discard")
@@ -38,6 +43,9 @@ class PlayerState:
     def gain_cards(self, cards: List[str]):
         for card in cards:
             self.discard[card] += 1
+    
+    def safe_cards(self, cards: List[str]):
+        self.safe = cards
 
     def summary(self):
         return {

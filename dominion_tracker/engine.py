@@ -13,6 +13,9 @@ class ActionType(Enum):
     DISCARD_HAND = auto()
     SHUFFLE = auto()
     GAIN = auto()
+    DISCARD_WHOLE_HAND = auto()
+    DISCARD_WHOLE_PLAYED = auto()
+    TURN_CHANGE = auto()
     # Later: TRASH, REVEAL, etc.
 
 
@@ -28,9 +31,19 @@ class Action:
 class GameEngine:
     def __init__(self):
         self.state = PlayerState()
+        self.state.deck["Copper"] = 7
+        self.state.deck["Estate"] = 3
+
+    def start_turn(self):
+        self.state.move_from_hand_to_deck(self.state.safe)
+        self.apply(Action(ActionType.DISCARD_WHOLE_HAND, []))
+        self.apply(Action(ActionType.DISCARD_WHOLE_PLAYED, []))
+        self.apply(Action(ActionType.DRAW, self.state.safe))
+           
 
     def apply(self, action: Action):
         """Applies a parsed action to the player's state."""
+
         try:
             if action.type == ActionType.DRAW:
                 self.state.move_from_deck_to_hand(action.cards)
@@ -45,10 +58,31 @@ class GameEngine:
                 self.state.move_from_hand_to_discard(action.cards)
 
             elif action.type == ActionType.SHUFFLE:
-                self.state.move_from_discard_to_deck(action.cards)
+                # Move all cards from discard to deck
+                cards = list([])
+                for card, count in self.state.discard.items():
+                    cards.extend([card] * count)
+                self.state.move_from_discard_to_deck(cards)
+            
+            elif action.type == ActionType.DISCARD_WHOLE_HAND:
+                # Move all cards from discard to deck
+                cards = list([])
+                for card, count in self.state.hand.items():
+                    cards.extend([card] * count)
+                self.state.move_from_hand_to_discard(cards)
+
+            elif action.type == ActionType.DISCARD_WHOLE_PLAYED:
+                # Move all cards from discard to deck
+                cards = list([])
+                for card, count in self.state.in_play.items():
+                    cards.extend([card] * count)
+                self.state.move_from_played_to_discard(cards)
 
             elif action.type == ActionType.GAIN:
                 self.state.gain_cards(action.cards)
+
+            elif action.type == ActionType.TURN_CHANGE:
+                self.start_turn()
 
             else:
                 raise ValueError(f"Unknown action type: {action.type}")
