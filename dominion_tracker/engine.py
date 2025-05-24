@@ -16,6 +16,7 @@ class ActionType(Enum):
     DISCARD_WHOLE_HAND = auto()
     DISCARD_WHOLE_PLAYED = auto()
     END_TURN = auto()
+    TRASH = auto()
     # Later: TRASH, REVEAL, etc.
 
 
@@ -78,6 +79,9 @@ class GameEngine:
             elif action.type == ActionType.END_TURN:
                 self.apply(Action(ActionType.DISCARD_WHOLE_HAND, []))
                 self.apply(Action(ActionType.DISCARD_WHOLE_PLAYED, []))
+            
+            elif action.type == ActionType.TRASH:
+                self.state.trash_cards(action.cards)
 
             else:
                 raise ValueError(f"Unknown action type: {action.type}")

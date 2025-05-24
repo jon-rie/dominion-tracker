@@ -15,8 +15,8 @@ class PlayerState:
 
     def move_cards(self, source: Dict[str, int], target: Dict[str, int], cards: List[str], action: str = ""):
         for card in cards:
-            #if source[card] <= 0:
-            #    raise InvalidCardMove(f"Tried to {action} '{card}' but it's not in source pile.")
+            if source[card] <= 0:
+                raise InvalidCardMove(f"Tried to {action} '{card}' but it's not in source pile.")
             source[card] -= 1
             if source[card] == 0:
                 del source[card]
@@ -43,9 +43,12 @@ class PlayerState:
     def gain_cards(self, cards: List[str]):
         for card in cards:
             self.discard[card] += 1
-    
-    def safe_cards(self, cards: List[str]):
-        self.safe = cards
+
+    def trash_cards(self, cards: List[str]):
+        for card in cards:
+            self.hand[card] -= 1
+            if self.hand[card] == 0:
+                del self.hand[card]
 
     def summary(self):
         return {
