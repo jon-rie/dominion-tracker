@@ -17,7 +17,6 @@ class ActionType(Enum):
     DISCARD_WHOLE_PLAYED = auto()
     END_TURN = auto()
     TRASH = auto()
-    # Later: TRASH, REVEAL, etc.
 
 
 class Action:
@@ -30,14 +29,15 @@ class Action:
 
 
 class GameEngine:
-    def __init__(self):
+    def __init__(self, starting_deck: Dict[str, int] = None) -> None:
         self.state = PlayerState()
-        self.state.deck["Copper"] = 7
-        self.state.deck["Estate"] = 3
+        if starting_deck is None:
+            starting_deck = {"Copper": 7, "Estate": 3}
+        for card, count in starting_deck.items():
+            self.state.deck[card] = count
            
 
-    def apply(self, action: Action):
-        """Applies a parsed action to the player's state."""
+    def apply(self, action: Action) -> None:
 
         try:
             if action.type == ActionType.DRAW:
@@ -53,44 +53,33 @@ class GameEngine:
                 self.state.move_from_hand_to_discard(action.cards)
 
             elif action.type == ActionType.SHUFFLE:
-                # Move all cards from discard to deck
-                cards = list([])
-                for card, count in self.state.discard.items():
-                    cards.extend([card] * count)
-                self.state.move_from_discard_to_deck(cards)
+                self.state.move_whole_discard_to_deck()
             
             elif action.type == ActionType.DISCARD_WHOLE_HAND:
-                # Move all cards from discard to deck
-                cards = list([])
-                for card, count in self.state.hand.items():
-                    cards.extend([card] * count)
-                self.state.move_from_hand_to_discard(cards)
+                self.state.move_whole_hand_to_discard()
 
             elif action.type == ActionType.DISCARD_WHOLE_PLAYED:
-                # Move all cards from discard to deck
-                cards = list([])
-                for card, count in self.state.in_play.items():
-                    cards.extend([card] * count)
-                self.state.move_from_played_to_discard(cards)
+                self.state.move_whole_played_to_discard()
 
             elif action.type == ActionType.GAIN:
                 self.state.gain_cards(action.cards)
 
             elif action.type == ActionType.END_TURN:
-                self.apply(Action(ActionType.DISCARD_WHOLE_HAND, []))
-                self.apply(Action(ActionType.DISCARD_WHOLE_PLAYED, []))
+                self.state.move_whole_played_to_discard()
+                self.state.move_whole_hand_to_discard()
             
             elif action.type == ActionType.TRASH:
                 self.state.trash_cards(action.cards)
 
             else:
+                logger.error(f"Unknown action type: {action.type}")
                 raise ValueError(f"Unknown action type: {action.type}")
 
         except InvalidCardMove as e:
-            logger.info(f"Invalid move: {e}")
+            logger.warning(f"Invalid move: {e}")
 
     def summary(self) -> Dict[str, Dict[str, int]]:
         return self.state.summary()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.state)

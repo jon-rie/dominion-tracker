@@ -11,7 +11,7 @@ class PlayerState:
         self.deck: Dict[str, int] = defaultdict(int)
         self.hand: Dict[str, int] = defaultdict(int)
         self.discard: Dict[str, int] = defaultdict(int)
-        self.in_play: Dict[str, int] = defaultdict(int)
+        self.played: Dict[str, int] = defaultdict(int)
 
     def move_cards(self, source: Dict[str, int], target: Dict[str, int], cards: List[str], action: str = ""):
         for card in cards:
@@ -23,7 +23,7 @@ class PlayerState:
             target[card] += 1
 
     def move_from_hand_to_played(self, cards: List[str]):
-        self.move_cards(self.hand, self.in_play, cards, action="play")
+        self.move_cards(self.hand, self.played, cards, action="play")
 
     def move_from_hand_to_discard(self, cards: List[str]):
         self.move_cards(self.hand, self.discard, cards, action="discard")
@@ -38,7 +38,19 @@ class PlayerState:
         self.move_cards(self.hand, self.deck, cards, action="return to deck")
 
     def move_from_played_to_discard(self, cards: List[str]):
-        self.move_cards(self.in_play, self.discard, cards, action="discard")
+        self.move_cards(self.played, self.discard, cards, action="discard")
+    
+    def move_whole_discard_to_deck(self):
+        discard = list([k for k,v in self.discard.items() for _ in range(v)])
+        self.move_from_discard_to_deck(discard)
+    
+    def move_whole_hand_to_discard(self):
+        hand = list([k for k,v in self.hand.items() for _ in range(v)])
+        self.move_from_hand_to_discard(hand)
+    
+    def move_whole_played_to_discard(self):
+        played = list([k for k,v in self.played.items() for _ in range(v)])
+        self.move_from_played_to_discard(played)
     
     def gain_cards(self, cards: List[str]):
         # Cards are gained from outside the tracked piles
@@ -55,16 +67,16 @@ class PlayerState:
             "deck": dict(self.deck),
             "hand": dict(self.hand),
             "discard": dict(self.discard),
-            "in_play": dict(self.in_play)   
+            "played": dict(self.played)   
         }
     
     def total_cards(self):
         total = Counter()
-        for pile in [self.deck, self.hand, self.discard, self.in_play]:
+        for pile in [self.deck, self.hand, self.discard, self.played]:
             total.update(pile)
         return dict(total)
     
     def __repr__(self):
-        return f"Deck: {dict(self.deck)}, Hand: {dict(self.hand)}, Discard: {dict(self.discard)}, In Play: {dict(self.in_play)}"
+        return f"Deck: {dict(self.deck)}, Hand: {dict(self.hand)}, Discard: {dict(self.discard)}, In Play: {dict(self.played)}"
 
 
