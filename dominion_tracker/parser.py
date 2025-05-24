@@ -78,6 +78,9 @@ class Parser:
         if "buys and gains" in text or "gains" in text:
             return Action(ActionType.GAIN, cards)
         
+        if "trashes" in text:
+            return Action(ActionType.TRASH, cards)
+        
         if "ends" in text:
             return Action(ActionType.END_TURN, [])
 
@@ -95,7 +98,7 @@ class Parser:
         tokens = clean_text.split()
 
         cards = []
-        skip_words = {"a", "an", "and", "cards", "card", "their", "starts", "with", "turn", "draws", "plays", "discards", "gains", "buys", self.player_id.lower()}
+        skip_words = {"a", "an", "and", "cards", "card", "their", "starts", "with", "turn", "draws", "plays", "discards", "gains", "buys", "trashes", self.player_id.lower()}
 
         i = 0
         while i < len(tokens):
