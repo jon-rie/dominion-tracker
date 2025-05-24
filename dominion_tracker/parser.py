@@ -2,6 +2,38 @@ import re
 from typing import List, Optional
 from dominion_tracker.engine import Action, ActionType
 
+def read_events(file_path, player_ids) -> list[str]:
+    events = []
+    current_event = []
+
+    with open(file_path) as f:
+        lines = [line.strip() for line in f if line.strip()]  # Strip and skip empty lines
+
+    for i, line in enumerate(lines):
+        # New event starts
+        if line.startswith("Turn") or any(line.startswith(pid) for pid in player_ids):
+            if current_event:
+                events.append(" ".join(current_event))
+                current_event = []
+
+        current_event.append(line)
+
+        if line.startswith("Turn"):
+            # Look back in the last few events to find the draw (and optional shuffle) event of "O"
+            pos = len(events) - 1
+            player_id = events[pos].split()[0]
+            if pos > 0 and "shuffles" in events[pos - 1]:
+                insert_at = pos - 1
+            else:
+                insert_at = pos
+            events.insert(insert_at, f"{player_id} ends turn")
+
+    # Append last event if it exists
+    if current_event:
+        events.append(" ".join(current_event))
+
+    return events
+
 # Basic singularization helper (can be expanded or replaced by a lib like inflect)
 def singularize(card_name: str) -> str:
     if card_name.endswith("ies"):
