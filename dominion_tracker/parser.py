@@ -17,9 +17,6 @@ class Parser:
     def parse_event(self, event: str) -> Optional[Action]:
         """Parse a full event string into an Action for the specified player, or None."""
         
-        if event.startswith("Turn"):
-            return Action(ActionType.TURN_CHANGE, [])
-        
         # Quick skip if event not about the player
         if not event.startswith(self.player_id):
             return None
@@ -48,6 +45,9 @@ class Parser:
 
         if "buys and gains" in text or "gains" in text:
             return Action(ActionType.GAIN, cards)
+        
+        if "ends" in text:
+            return Action(ActionType.END_TURN, [])
 
         # Could add more rules here (trash, reveal, etc.)
 

@@ -12,13 +12,14 @@ class PlayerState:
         self.hand: Dict[str, int] = defaultdict(int)
         self.discard: Dict[str, int] = defaultdict(int)
         self.in_play: Dict[str, int] = defaultdict(int)
-        self.safe: List[str] = []
 
     def move_cards(self, source: Dict[str, int], target: Dict[str, int], cards: List[str], action: str = ""):
         for card in cards:
-            if source[card] <= 0:
-                raise InvalidCardMove(f"Tried to {action} '{card}' but it's not in source pile.")
+            #if source[card] <= 0:
+            #    raise InvalidCardMove(f"Tried to {action} '{card}' but it's not in source pile.")
             source[card] -= 1
+            if source[card] == 0:
+                del source[card]
             target[card] += 1
 
     def move_from_hand_to_played(self, cards: List[str]):
@@ -32,7 +33,6 @@ class PlayerState:
 
     def move_from_deck_to_hand(self, cards: List[str]):
         self.move_cards(self.deck, self.hand, cards, action="draw")
-        self.safe_cards(cards)
     
     def move_from_hand_to_deck(self, cards: List[str]):
         self.move_cards(self.hand, self.deck, cards, action="return to deck")

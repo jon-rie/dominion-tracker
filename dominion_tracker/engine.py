@@ -15,7 +15,7 @@ class ActionType(Enum):
     GAIN = auto()
     DISCARD_WHOLE_HAND = auto()
     DISCARD_WHOLE_PLAYED = auto()
-    TURN_CHANGE = auto()
+    END_TURN = auto()
     # Later: TRASH, REVEAL, etc.
 
 
@@ -33,12 +33,6 @@ class GameEngine:
         self.state = PlayerState()
         self.state.deck["Copper"] = 7
         self.state.deck["Estate"] = 3
-
-    def start_turn(self):
-        self.state.move_from_hand_to_deck(self.state.safe)
-        self.apply(Action(ActionType.DISCARD_WHOLE_HAND, []))
-        self.apply(Action(ActionType.DISCARD_WHOLE_PLAYED, []))
-        self.apply(Action(ActionType.DRAW, self.state.safe))
            
 
     def apply(self, action: Action):
@@ -81,8 +75,9 @@ class GameEngine:
             elif action.type == ActionType.GAIN:
                 self.state.gain_cards(action.cards)
 
-            elif action.type == ActionType.TURN_CHANGE:
-                self.start_turn()
+            elif action.type == ActionType.END_TURN:
+                self.apply(Action(ActionType.DISCARD_WHOLE_HAND, []))
+                self.apply(Action(ActionType.DISCARD_WHOLE_PLAYED, []))
 
             else:
                 raise ValueError(f"Unknown action type: {action.type}")
