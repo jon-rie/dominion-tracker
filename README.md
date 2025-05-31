@@ -5,9 +5,10 @@ A command-line tool to track your deck, hand, and discard pile in a Dominion gam
 ## Features
 - Parses plain-text Dominion logs
 - Tracks hand, deck, and discard
-- No card-specific rules or dependencies
+- Still work inprogress
 
 ## Usage
 
 ```bash
-python -m dominion_tracker.main
+python main.py --players O,L --log sample_logs/game_log.txt
+

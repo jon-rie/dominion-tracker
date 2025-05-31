@@ -1,11 +1,19 @@
 [project]
 name = "dominion-tracker"
 version = "0.1.0"
-description = "Track your Dominion deck and hand from game logs"
-authors = [{ name="Jonas Riedel", email="jonas.riedel2001gmail.com" }]
+description = "Track your Dominion deck and hand from game logs."
+authors = [{ name = "Jonas Riedel", email = "jonas.riedel2001@gmail.com" }]
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.7"
+dependencies = [
+    "click",         # optional if using CLI args via Click
+    "rich",          # optional: for nice console output
+]
 
 [project.scripts]
 dominion-tracker = "dominion_tracker.main:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
