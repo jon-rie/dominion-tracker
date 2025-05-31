@@ -29,10 +29,8 @@ class Action:
 
 
 class GameEngine:
-    def __init__(self, starting_deck: Dict[str, int] = None) -> None:
+    def __init__(self, starting_deck: Dict[str, int] = {"Copper": 7, "Estate": 3}) -> None:
         self.state = PlayerState()
-        if starting_deck is None:
-            starting_deck = {"Copper": 7, "Estate": 3}
         for card, count in starting_deck.items():
             self.state.deck[card] = count
            

@@ -1,8 +1,10 @@
 import re
 from typing import List, Optional
 from dominion_tracker.engine import Action, ActionType
+import csv
+from pathlib import Path
 
-def read_events(file_path, player_ids) -> list[str]:
+def read_events(file_path: str, player_ids: tuple[str, ...]) -> list[str]:
     events = []
     current_event = []
 
@@ -34,7 +36,6 @@ def read_events(file_path, player_ids) -> list[str]:
 
     return events
 
-# Basic singularization helper (can be expanded or replaced by a lib like inflect)
 def singularize(card_name: str) -> str:
     if card_name.endswith("ies"):
         return card_name[:-3] + "y"  # e.g. "parties" -> "party"
@@ -43,21 +44,35 @@ def singularize(card_name: str) -> str:
     return card_name
 
 class Parser:
-    def __init__(self, player_id: str):
+
+    def __init__(self, player_id: str, card_csv_path: str = "cards/dominion_cards.csv", max_card_words: int = 3):
         self.player_id = player_id
+        self.max_card_words = max_card_words
+        path = Path(card_csv_path)
+        self.valid_card_names = self._load_card_names(path)
+
+    
+    def _load_card_names(self, path: Path) -> dict:
+        card_names = {}
+        with open(path, newline='', encoding='utf-8') as csvfile:
+            reader = csv.reader(csvfile)
+            next(reader, None)  # Skip header
+            for row in reader:
+                if not row:
+                    continue
+                name = row[0].strip()
+                if name:
+                    card_names[name.lower()] = name
+        return card_names
 
     def parse_event(self, event: str) -> Optional[Action]:
         """Parse a full event string into an Action for the specified player, or None."""
         
-        # Quick skip if event not about the player
         if not event.startswith(self.player_id):
             return None
 
-        # Normalize spacing and lower case for easier matching
         text = event.lower()
 
-        # Extract cards (simple heuristic): words after keywords like 'draws', 'plays', 'discards', 'gains'
-        # Cards are usually like "3 coppers", "an estate", "a village"
         cards = self.extract_cards(text)
 
         # Determine action type from keywords
@@ -84,60 +99,46 @@ class Parser:
         if "ends" in text:
             return Action(ActionType.END_TURN, [])
 
-        # Could add more rules here (trash, reveal, etc.)
-
         return None
 
 
-    def extract_cards(self,text: str) -> List[str]:
-        """Extract cards from event text with counts and singularized names."""
-        # Clean up currency and punctuation, lower case for consistency
-        clean_text = re.sub(r"\(\+\$.*?\)", "", text.lower())
-        clean_text = clean_text.replace(",", " ").replace(".", " ")
+    def extract_cards(self, text: str) -> List[str]:
+        """Extract card names (single or multi-word) from text using known card name list."""
 
+        # Normalize input
+        clean_text = re.sub(r"\(\+\$.*?\)", "", text)
+        clean_text = re.sub(r"[.,]", " ", clean_text)
         tokens = clean_text.split()
 
-        cards = []
-        skip_words = {"a", "an", "and", "cards", "card", "their", "starts", "with", "turn", "draws", "plays", "discards", "gains", "buys", "trashes", self.player_id.lower()}
+        for i in range(len(tokens)):
+            tokens[i] = singularize(tokens[i])
 
+        result = []
         i = 0
         while i < len(tokens):
-            token = tokens[i]
 
-            if token in skip_words:
+            # Handle leading numeric count
+            if tokens[i].isdigit():
+                count = int(tokens[i])
                 i += 1
-                continue
+            else:
+                count = 1
 
-            # Check if token is a number (count)
-            if token.isdigit():
-                count = int(token)
-                # Next token should be card name
-                if i + 1 < len(tokens):
-                    card_name = singularize(tokens[i + 1])
-                    cards.extend([card_name.capitalize()] * count)
-                    i += 2
-                    continue
-                else:
-                    i += 1
-                    continue
+            # Try to match up to 3-word card names (greedy)
+            matched = False
+            for span in range(self.max_card_words, 0, -1):
+                if i + span <= len(tokens):
+                    candidate = " ".join(tokens[i:i + span])
+                    if candidate in self.valid_card_names:
+                        result.extend([self.valid_card_names[candidate]] * count)
+                        i += span
+                        matched = True
+                        break
 
-            # Handle "a" or "an" + card_name (means count=1)
-            if token in {"a", "an"} and i + 1 < len(tokens):
-                card_name = singularize(tokens[i + 1])
-                cards.append(card_name.capitalize())
-                i += 2
-                continue
+            if not matched:
+                i += 1  # Skip unrecognized token
 
-            # If just a card name without count
-            if token not in skip_words:
-                card_name = singularize(token)
-                cards.append(card_name.capitalize())
-                i += 1
-                continue
-
-            i += 1
-
-        return cards
+        return result
     
 
 

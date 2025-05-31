@@ -1,27 +1,66 @@
-import unittest
-from dominion_tracker.parser import Parser
-from dominion_tracker.engine import Action
+import pytest
+from unittest.mock import mock_open, patch
+from dominion_tracker.engine import Action, ActionType
+from dominion_tracker.parser import Parser, read_events, singularize
 
-class TestParser(unittest.TestCase):
-    def test_parse_game_log(self):
-        parser = Parser(player_id="O")
-        actions = []
 
-        with open("sample_logs/game_log.txt") as f:
-            for line in f:
-                action = parser.parse_line(line)
-                if action:
-                    actions.append(action)
+MOCK_CSV = "Name\nCopper\nEstate\nSilver\nVillage\nThrone Room\n"
 
-        # Check that at least some actions were parsed
-        self.assertTrue(len(actions) > 0, "No actions parsed from game_log.txt")
+@pytest.fixture
+def mocked_parser():
+    with patch("builtins.open", mock_open(read_data=MOCK_CSV)):
+        parser = Parser("P1", card_csv_path="fake.csv")
+    return parser
 
-        # Check all actions belong to player O (if you store player info in Action)
-        # Assuming Action has attribute player_id; adjust if different
-        for action in actions:
-            # If your Action class does not include player info, skip this check
-            if hasattr(action, "player_id"):
-                self.assertEqual(action.player_id, "O")
 
-if __name__ == "__main__":
-    unittest.main()
+def test_singularize_cases():
+    assert singularize("parties") == "party"
+    assert singularize("coppers") == "copper"
+    assert singularize("kiss") == "kiss"
+
+
+def test_extract_single_and_multi_word_cards(mocked_parser):
+    text = "P1 draws a copper and a throne room."
+    cards = mocked_parser.extract_cards(text)
+    assert cards == ["Copper", "Throne Room"]
+
+
+def test_parse_event_draw(mocked_parser):
+    event = "P1 draws 2 coppers and an estate"
+    action = mocked_parser.parse_event(event)
+    assert action.type == ActionType.DRAW
+    assert action.cards == ["Copper", "Copper", "Estate"]
+
+
+def test_parse_event_play(mocked_parser):
+    event = "P1 plays a throne room and a village"
+    action = mocked_parser.parse_event(event)
+    assert action.type == ActionType.PLAY
+    assert action.cards == ["Throne Room", "Village"]
+
+
+def test_parse_event_gain(mocked_parser):
+    event = "P1 gains a silver"
+    action = mocked_parser.parse_event(event)
+    assert action.type == ActionType.GAIN
+    assert action.cards == ["Silver"]
+
+
+def test_parse_event_shuffle(mocked_parser):
+    event = "P1 shuffles their deck"
+    action = mocked_parser.parse_event(event)
+    assert action.type == ActionType.SHUFFLE
+    assert action.cards == []
+
+
+def test_parse_event_trash(mocked_parser):
+    event = "P1 trashes 1 copper"
+    action = mocked_parser.parse_event(event)
+    assert action.type == ActionType.TRASH
+    assert action.cards == ["Copper"]
+
+
+def test_parse_event_none(mocked_parser):
+    event = "P2 draws a copper"  # Not for P1
+    action = mocked_parser.parse_event(event)
+    assert action is None
